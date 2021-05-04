@@ -50,7 +50,7 @@ class XP_System(commands.Cog):
         progress_bar = f"{':blue_square:' * filled_boxes_number}{':white_large_square:' * unfilled_boxes_number}"
 
         embed = discord.Embed(
-            title=f"{user[:-5]}'s Ranking Statistics:",
+            title=f"{str(user)[:-5]}'s Ranking Statistics:",
             color=discord.Color.blue()
         )
         embed.add_field(name="Name", value=str(user)[:-5], inline=True)
