@@ -9,11 +9,11 @@ class Utilities(commands.Cog):
 
     @commands.command(aliases=["ping"])
     async def latency(self, ctx):
-        latency = self.bot.latency
+        latency = self.bot.latency * 1000
 
-        if latency <= 50:
+        if latency <= 80:
             colour = discord.Color.green
-        elif latency > 300:
+        elif latency > 250:
             colour = discord.Color.red
         else:
             colour = discord.Color.orange
@@ -22,7 +22,7 @@ class Utilities(commands.Cog):
             title="Bot Latency Test",
             color=colour()
         )
-        embed.add_field(name="Latency", value=f"{round(latency, 2)}ms", inline=True)
+        embed.add_field(name="Latency", value=f"{round(latency, 1)}ms", inline=True)
         embed.set_thumbnail(
             url="https://media.istockphoto.com/vectors/wifi-icon-on-black-background-black-flat-style-vector"
                 "-illustration-vector-id1170032746?k=6&m=1170032746&s=170667a&w=0&h=HaCvZNq"
