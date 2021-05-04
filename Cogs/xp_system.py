@@ -3,17 +3,20 @@ import json
 import discord
 from discord.ext import commands
 
-from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data
+from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data, ratelimit_check
 
 
 class XP_System(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.cooldown = commands.CooldownMapping.from_cooldown(10.0, 50.0, commands.BucketType.user)
 
     @commands.Cog.listener()
     async def on_message(self, msg):
         if not msg.author.bot:
+            if ratelimit_check(self.cooldown, msg) is not None:
+                return
             with open("Data Storage/server_xp_data.json", "r+") as f:
                 xp_data = json.load(f)
 
@@ -47,7 +50,7 @@ class XP_System(commands.Cog):
         progress_bar = f"{':blue_square:' * filled_boxes_number}{':white_large_square:' * unfilled_boxes_number}"
 
         embed = discord.Embed(
-            title=f"{ctx.message.author}'s Ranking Statistics:",
+            title=f"{user[:-5]}'s Ranking Statistics:",
             color=discord.Color.blue()
         )
         embed.add_field(name="Name", value=str(user)[:-5], inline=True)
@@ -57,7 +60,7 @@ class XP_System(commands.Cog):
         embed.add_field(name="Server Rank", value=str(user_rank), inline=True)
         embed.add_field(name="XP Before Level Up", value=str(level_xp_total - user_xp_in_current_level), inline=True)
         embed.add_field(name="Level Progress", value=progress_bar, inline=False)
-        embed.set_thumbnail(url=ctx.message.author.avatar_url)
+        embed.set_thumbnail(url=user.avatar_url)
 
         await ctx.send(embed=embed)
 
