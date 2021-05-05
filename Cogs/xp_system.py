@@ -3,25 +3,28 @@ import json
 import discord
 from discord.ext import commands
 
-from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data, ratelimit_check
+from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data, ratelimit_check, limit_len_range
 
 
 class XP_System(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.cooldown = commands.CooldownMapping.from_cooldown(10.0, 50.0, commands.BucketType.user)
+        self.cooldown = commands.CooldownMapping.from_cooldown(5.0, 60.0, commands.BucketType.user)
 
     @commands.Cog.listener()
     async def on_message(self, msg):
         if not msg.author.bot:
             if ratelimit_check(self.cooldown, msg) is not None:
                 return
+
+            xp_len_multiplier = int((limit_len_range(len(str(msg))) * 0.8) // 20)
+
             with open("Data Storage/server_xp_data.json", "r+") as f:
                 xp_data = json.load(f)
 
             xp_data = await update_data(xp_data, msg.author, msg.guild)
-            xp_data = await add_experience(xp_data, msg.author, msg.guild)
+            xp_data = await add_experience(xp_data, msg.author, msg.guild, value=xp_len_multiplier)
             xp_data = await level_up(xp_data, msg.author, msg.channel, msg.guild)
 
             with open("Data Storage/server_xp_data.json", "w+") as f:
