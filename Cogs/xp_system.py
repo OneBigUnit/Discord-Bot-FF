@@ -1,46 +1,54 @@
-import json
-
 import discord
 from discord.ext import commands
 
 from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data, ratelimit_check
+from main import database
 
 
 class XP_System(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.cooldown = commands.CooldownMapping.from_cooldown(10.0, 50.0, commands.BucketType.user)
+        self.cooldown = commands.CooldownMapping.from_cooldown(5.0, 60.0, commands.BucketType.user)
 
     @commands.Cog.listener()
     async def on_message(self, msg):
         if not msg.author.bot:
             if ratelimit_check(self.cooldown, msg) is not None:
                 return
-            with open("Data Storage/server_xp_data.json", "r+") as f:
-                xp_data = json.load(f)
+
+            xp_data = database.child("XP Data").get().val()
+            if xp_data is None:
+                xp_data = {}
+            else:
+                xp_data = dict(xp_data)
 
             xp_data = await update_data(xp_data, msg.author, msg.guild)
             xp_data = await add_experience(xp_data, msg.author, msg.guild)
             xp_data = await level_up(xp_data, msg.author, msg.channel, msg.guild)
 
-            with open("Data Storage/server_xp_data.json", "w+") as f:
-                json.dump(xp_data, f)
+            database.child("XP Data").set(xp_data)
 
     @commands.command(aliases=["lvl", "rank"])
     async def level(self, ctx, user: discord.Member = None):
         if user is None:
             user = ctx.message.author
 
-        with open("Data Storage/server_xp_data.json", "r+") as f:
-            xp_data = sort_xp_data(json.load(f)[f"{ctx.guild}#{ctx.guild.id}"])
+        xp_data = database.child("XP Data").get().val()
+        if xp_data is None:
+            xp_data = {}
+        else:
+            xp_data = sort_xp_data(dict(xp_data)[f"{ctx.guild}_{ctx.guild.id}"])
 
         try:
-            user_level = xp_data[str(user)]["level"]
-            user_experience = xp_data[str(user)]["experience"]
+            user_level = xp_data[str(user).replace("#", "_")]["level"]
+            user_experience = xp_data[str(user).replace("#", "_")]["experience"]
         except KeyError:
             user_level, user_experience = 1, 0
-        user_rank = list(xp_data.keys()).index(str(user)) + 1
+        try:
+            user_rank = list(xp_data.keys()).index(str(user).replace("#", "_")) + 1
+        except ValueError:
+            user_rank = None
         xp_required_for_current_level = int(((user_level - 1) / 0.3) ** 2)
         xp_required_for_next_level = int((user_level / 0.3) ** 2)
         level_xp_total = xp_required_for_next_level - xp_required_for_current_level
@@ -60,14 +68,17 @@ class XP_System(commands.Cog):
         embed.add_field(name="Server Rank", value=str(user_rank), inline=True)
         embed.add_field(name="XP Before Level Up", value=str(level_xp_total - user_xp_in_current_level), inline=True)
         embed.add_field(name="Level Progress", value=progress_bar, inline=False)
-        embed.set_thumbnail(url=user.avatar_url)
+        embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["levels", "rankings", "lb"])
     async def leaderboard(self, ctx):
-        with open("Data Storage/server_xp_data.json", "r+") as f:
-            xp_data = sort_xp_data(json.load(f)[f"{ctx.guild}#{ctx.guild.id}"])
+        xp_data = database.child("XP Data").get().val()
+        if xp_data is None:
+            xp_data = {}
+        else:
+            xp_data = sort_xp_data(dict(xp_data)[f"{ctx.guild}_{ctx.guild.id}"])
 
         embed = discord.Embed(
             title=f"'{ctx.guild}' Server Rankings:",
