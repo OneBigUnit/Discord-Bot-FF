@@ -39,9 +39,28 @@ class Fun(commands.Cog):
         if user is None:
             user = ctx.message.author
 
-        length = random.randint(0, )
+        first_pp = database.child("Fun").child(f"{ctx.guild}_{ctx.guild.id}").child(
+            str(user).replace("#", "_")).get().val() is None and ctx.message.author == user
+
+        length = random.randint(0, 20)
         diagram = "8" + f"{'=' * length}" + "D"
+
+        if first_pp:
+            database.child("Fun").child(f"{ctx.guild}_{ctx.guild.id}").child(str(user).replace("#", "_")).set(
+                {"First Penis Score": diagram})
+
         await ctx.send(f"{user.mention}'s penis size: {diagram}")
+
+    @commands.command(aliases=["firstpp", "actuallpp", "actualpenis"])
+    async def firstpenis(self, ctx, user: discord.Member = None):
+        if user is None:
+            user = ctx.message.author
+        data = database.child("Fun").child(f"{ctx.guild}_{ctx.guild.id}").child(str(user).replace("#", "_")).get().val()
+        if data is None:
+            await ctx.send(f"{user.mention} has not used .pp yet")
+        else:
+            data = dict(data)
+            await ctx.send(f"{user.mention}'s first penis score was: {data['First Penis Score']}")
 
 
 def setup(bot):
