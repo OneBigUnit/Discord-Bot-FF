@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data, ratelimit_check, limit_len_range
+from Utilities.xp_system import update_data, add_experience, level_up, sort_xp_data, ratelimit_check
 from main import database
 
 
@@ -17,8 +17,6 @@ class XP_System(commands.Cog):
             if ratelimit_check(self.cooldown, msg) is not None:
                 return
 
-            xp_len_multiplier = int((limit_len_range(len(str(msg))) + 20) // 20)
-
             xp_data = database.child("XP Data").get().val()
             if xp_data is None:
                 xp_data = {}
@@ -26,7 +24,7 @@ class XP_System(commands.Cog):
                 xp_data = dict(xp_data)
 
             xp_data = await update_data(xp_data, msg.author, msg.guild)
-            xp_data = await add_experience(xp_data, msg.author, msg.guild, value=xp_len_multiplier)
+            xp_data = await add_experience(xp_data, msg.author, msg.guild)
             xp_data = await level_up(xp_data, msg.author, msg.channel, msg.guild)
 
             database.child("XP Data").set(xp_data)
@@ -60,7 +58,7 @@ class XP_System(commands.Cog):
         progress_bar = f"{':blue_square:' * filled_boxes_number}{':white_large_square:' * unfilled_boxes_number}"
 
         embed = discord.Embed(
-            title=f"{ctx.message.author}'s Ranking Statistics:",
+            title=f"{str(user)[:-5]}'s Ranking Statistics:",
             color=discord.Color.blue()
         )
         embed.add_field(name="Name", value=str(user)[:-5], inline=True)
