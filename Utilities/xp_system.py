@@ -29,3 +29,12 @@ async def level_up(xp_data, author, channel, server):
 
 def sort_xp_data(data):
     return {k: v for k, v in sorted(data.items(), key=lambda item: item[1]["experience"])}
+
+
+def ratelimit_check(cooldown, message):
+    bucket = cooldown.get_bucket(message)
+    return bucket.update_rate_limit()
+
+
+def limit_len_range(n):
+    return max(min(80, n), 1)

@@ -17,7 +17,7 @@ class XP_System(commands.Cog):
             if ratelimit_check(self.cooldown, msg) is not None:
                 return
 
-            xp_len_multiplier = int((limit_len_range(len(str(msg))) * 0.8) // 20)
+            xp_len_multiplier = int((limit_len_range(len(str(msg))) + 20) // 20)
 
             xp_data = database.child("XP Data").get().val()
             if xp_data is None:
