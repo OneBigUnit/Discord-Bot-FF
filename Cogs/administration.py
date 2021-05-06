@@ -18,15 +18,18 @@ class Administration(commands.Cog):
             n = str(100 - mod)
         print(n)
         try:
-            if not str(int(n)).isdigit(): return
+            if not str(int(n)).isdigit():
+                return
         except ValueError:
             return
         messages = []
         for message in await ctx.message.channel.history(limit=int(n) + mod).flatten():
             messages.append(message) if message.author == user or user is None else None
-        if ctx.message not in messages: messages.append(ctx.message)
+        if ctx.message not in messages:
+            messages.append(ctx.message)
         await ctx.message.channel.delete_messages(messages)
-        if n == str(100 - mod): n += " (max)"
+        if n == str(100 - mod):
+            n += " (max)"
         bot_message = await ctx.send(f"Deleted {n} messages.")
         await asyncio.sleep(2)
         await bot_message.delete()
