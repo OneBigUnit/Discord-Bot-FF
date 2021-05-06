@@ -3,6 +3,8 @@ import random
 import discord
 from discord.ext import commands
 
+from main import database
+
 
 class Fun(commands.Cog):
 
