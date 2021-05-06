@@ -41,7 +41,6 @@ class XP_System(commands.Cog):
             xp_data = {}
         else:
             xp_data = sort_xp_data(dict(xp_data)[f"{ctx.guild}_{ctx.guild.id}"])
-        print(xp_data, "Get on lvl com")
 
         try:
             user_level = xp_data[str(user).replace("#", "_")]["level"]
@@ -82,7 +81,6 @@ class XP_System(commands.Cog):
             xp_data = {}
         else:
             xp_data = sort_xp_data(dict(xp_data)[f"{ctx.guild}_{ctx.guild.id}"])
-        print(xp_data, "get on lb com")
 
         embed = discord.Embed(
             title=f"'{ctx.guild}' Server Rankings:",

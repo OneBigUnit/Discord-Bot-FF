@@ -1,13 +1,10 @@
 async def update_data(xp_data, author, server):
     if f"{server}_{server.id}" not in xp_data:
         xp_data[f"{server}_{server.id}"] = {}
-    print(f"{server}_{server.id}" not in xp_data, f"{server}_{server.id}")
-    print("Before Update: ", xp_data)
     if str(author).replace("#", "_") not in xp_data[f"{server}_{server.id}"]:
         xp_data[f"{server}_{server.id}"][str(author).replace("#", "_")] = {}
         xp_data[f"{server}_{server.id}"][str(author).replace("#", "_")]["experience"] = 0
         xp_data[f"{server}_{server.id}"][str(author).replace("#", "_")]["level"] = 1
-    print("After Update: ", xp_data)
     return xp_data
 
 
@@ -28,7 +25,7 @@ async def level_up(xp_data, author, channel, server):
 
 
 def sort_xp_data(data):
-    return {k: v for k, v in sorted(data.items(), key=lambda item: item[1]["experience"])}
+    return {k: v for k, v in sorted(data.items(), key=lambda item: item[1]["experience"], reverse=True)}
 
 
 def ratelimit_check(cooldown, message):
